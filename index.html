@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Игровой бриф для авторов. Найди тему, формат и первую идею для проверки.">
+<title>В твоём кадре · Бриф автора</title>
+<style>
+:root{color-scheme:dark;--ink:#fff7f3;--mute:#c9b9c9;--pink:#ff79a9;--amber:#ffd086;--line:#604157;--panel:#231624;--bg:#170e19;--gradient:linear-gradient(110deg,#ffcb76,#ff79a9 55%,#b599ff)}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 82% 0,#4d1c56,transparent 55%),radial-gradient(ellipse at 4% 30%,#482339,transparent 50%),var(--bg);color:var(--ink);font:16px/1.55 system-ui,sans-serif;min-height:100vh}
+main{width:min(100% - 32px,860px);margin:0 auto;padding:28px 0 64px}
+header{display:flex;gap:12px;justify-content:space-between;align-items:center;margin-bottom:26px;font-weight:800}
+.brand{display:flex;align-items:center;gap:10px}.mark{display:grid;place-items:center;width:33px;height:33px;color:#2c1530;background:var(--gradient);border-radius:10px;font-size:21px}
+#meter{color:var(--mute);font-size:.83rem;text-align:right}
+progress{width:100%;height:6px;display:block;margin-bottom:22px;border:0;border-radius:10px;background:#4b2a49;accent-color:var(--pink);overflow:hidden}
+progress::-webkit-progress-bar{background:#4b2a49}progress::-webkit-progress-value{background:var(--gradient)}
+.stage{position:relative;padding:clamp(22px,5vw,50px);border:1px solid var(--line);background:var(--panel);border-radius:26px;box-shadow:0 18px 60px #110a1766}
+.cover{background:radial-gradient(ellipse at 97% 4%,#6b2559,transparent 54%),radial-gradient(ellipse at 10% 100%,#50314b,transparent 62%),var(--panel)}
+h1,h2{line-height:1.06;letter-spacing:-.055em;margin:0 0 16px;font-weight:900}
+h1{font-size:clamp(2.5rem,8vw,5rem);max-width:12ch}
+h2{font-size:clamp(1.85rem,5vw,3rem)}
+h2:focus{outline:none}
+.eyebrow{color:var(--amber);font-weight:750;font-size:.85rem;margin:0 0 13px}
+.lead{font-size:clamp(1rem,3vw,1.22rem);max-width:54ch;margin:0 0 24px}
+.muted,small{color:var(--mute)}.muted{font-size:.9rem}
+.fields{display:grid;gap:17px;margin:23px 0}
+.field label,legend{font-weight:740}small{display:block;margin:3px 0 7px}
+textarea{width:100%;min-height:82px;padding:11px 13px;background:#190f1c;color:var(--ink);border:1px solid #76576d;border-radius:12px;font:inherit;resize:vertical}
+fieldset{margin:22px 0;padding:0;border:0;min-width:0}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+.choice{display:flex;align-items:flex-start;gap:8px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#291a2c;cursor:pointer}
+.choice:has(input:checked){border-color:var(--pink);background:#492339}
+input{accent-color:var(--pink);margin:5px 0 0;flex:none}
+button{padding:11px 17px;border-radius:999px;border:1px solid #8d6484;background:#2b1a30;color:var(--ink);font:inherit;font-weight:760;cursor:pointer}
+button.primary{color:#241229;background:var(--gradient);border-color:transparent}
+button:hover{border-color:var(--pink)}:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+.actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:22px}
+.badges{display:flex;flex-wrap:wrap;gap:7px;margin:18px 0}.badge{padding:5px 11px;border-radius:999px;background:#472742;color:#ffe4f3;font-size:.84rem}
+.result{margin:16px 0;padding:14px 18px;border-left:3px solid var(--pink);background:#2d1c31}
+.result h3{margin:0 0 5px}.result p{margin:6px 0}.result strong{color:var(--amber)}
+footer{color:var(--mute);font-size:.82rem;margin:17px 2px}#notice{margin-top:12px;color:var(--amber)}
+a{color:var(--pink)}
+@media(max-width:520px){.choices{grid-template-columns:1fr}main{padding-top:18px}.stage{border-radius:19px}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="brand"><span class="mark" aria-hidden="true">◉</span> В твоём кадре</div><span id="meter"></span></header>
+<progress id="progress" max="5" value="0" aria-label="Прогресс анкеты"></progress>
+<div id="screen"></div>
+<p id="notice" role="status"></p>
+<footer>Ответы хранятся в этом браузере. Готовый бриф можно скачать и передать самому. Результат отражает твои ответы о работе с блогом.</footer>
+<noscript>Чтобы пройти анкету, включи JavaScript в браузере.</noscript>
+</main>
+<script>
+const roles = {
+  scout: {name:'Исследую и отбираю', test:'Сними два выпуска с одной задачей зрителя и понятным критерием выбора. Попроси предложить следующий объект проверки.', product:'Маршрут, подборка или проверенный список для одной ситуации.'},
+  story: {name:'Рассказываю истории', test:'Сними две серии одной реальной истории. В первой покажи выбор, во второй его последствия. Отследи, кто попросил продолжение.', product:'Камерная встреча или короткий совместный челлендж с конкретной целью.'},
+  guide: {name:'Показываю как', test:'Ответь двумя роликами на один повторяющийся вопрос. Покажи исходный пример и проверяемый результат.', product:'Разбор, практикум или шаблон для одного повторяющегося запроса.'},
+  studio: {name:'Создаю для брендов', test:'Собери два примера для одной категории и предложи покупателю платный тест с фиксированным объёмом.', product:'Пакет коротких видео для площадок заказчика.'}
+};
+
+const rounds = [
+  {name:'Кадр из будущего', subtitle:'Представь обычный вторник через 90 дней. Блог стал ближе к тому, как тебе хочется жить и работать.', fields:[
+    ['future','Что в этом дне происходит?','Кто тебя смотрит, что ты выпустил и за что получил деньги?'],
+    ['goal','Какой один результат стоит измерять?','Например, оплаченные заказы, новые подписчики нужной ниши или продажи. Добавь число и срок.']
+  ]},
+  {name:'Батарейка автора', subtitle:'Вспомни, что даёт энергию в реальной работе, даже когда камера выключена.', pick:['На что ты потратишь свободный час?', {scout:'Сравню варианты и выберу лучший',story:'Запишу историю или разговор',guide:'Объясню то, в чём недавно разобрался',studio:'Сниму и соберу ролик для продукта'}], fields:[
+    ['energy','Что из этого ты уже делал с удовольствием?','Один пример. Какой формат быстро надоедает, даже если он приносит просмотры?'],
+    ['limits','Какой ритм ты выдержишь в обычную неделю?','Назови часы, что можно делегировать и какие темы остаются за кадром.']
+  ]},
+  {name:'Улика от зрителя', subtitle:'Вспомни конкретного человека и его действие. Слова и поступки полезнее общих предположений об аудитории.', pick:['Какой отклик тебе хочется получать чаще?', {scout:'«Сохранила и сходила по твоей наводке»',story:'«Я ждала, чем закончится»',guide:'«Попробовала по твоим шагам»',studio:'«Хотим заказать у тебя такую работу»'}], fields:[
+    ['evidence','Что тебе уже писали, о чём просили или за что платили?','Два примера из жизни. Укажи, что человек сделал дальше. Имена можно убрать.'],
+    ['viewpoint','С каким привычным мнением в своей теме ты споришь?','Назови случай, когда твой подход помог. По нему зритель поймёт, за что тебе доверять.'],
+    ['association','Закончи фразу от лица зрителя. «Когда мне нужно …, я иду к этому автору».','Назови одну ситуацию. Добавь ссылку на работу, которая это уже подтверждает.']
+  ]},
+  {name:'Трейлер следующей серии', subtitle:'У тебя есть телефон и возможность снять два выпуска. Представь, что зритель увидел первый и решает, ждать ли второй.', pick:['Какой зачин ближе твоему голосу?', {scout:'«Я проверил три варианта. Вот что выбрал бы снова»',story:'«Всё началось с одного решения. Сегодня узнаем, что вышло»',guide:'«У тебя есть эта проблема? Покажу, как я её решаю»',studio:'«Вот один продукт и две совершенно разные подачи»'}], fields:[
+    ['series','Как будут называться два первых выпуска?','Что у них общего и зачем зрителю вернуться за следующим?'],
+    ['experiment','Что поменяешь в следующем выпуске и по чему оценишь эффект?','Выбери одну вещь: начало, героя или подачу. Заранее реши, что сравнишь: подписки на тысячу охваченных, сохранения или заявки.'],
+    ['example','Какой эпизод лучше всего показывает твой характер?','Вставь ссылку на свой ролик или опиши реальный момент. Что зритель видит или слышит вначале?']
+  ]},
+  {name:'Первый платный тест', subtitle:'Выбери одну работу, которую реально взять на следующей неделе. Представь конкретного покупателя.', fields:[
+    ['offer','Что именно получит покупатель, за сколько и в какой срок?','Один результат, одна цена и один тип покупателя. Если идей несколько, запиши ту, которую хочется проверить первой.'],
+    ['paid','Что покажет, что предложение нужно рынку?','Например, оплата теста, предзаказ или запрос конкретного брифа с бюджетом. Запиши, где найдёшь первых покупателей.'],
+    ['metrics','Какие данные блога можно приложить для стратега?','Охват и прирост за 30 и 90 дней, топ городов, охват и подписки с 10–15 роликов, сохранения и отправки. Скриншоты можно передать отдельно.']
+  ]}
+];
+const key = 'creator-brief-v1';
+let state = {step:0, answers:{}, choices:{}};
+const screen = document.querySelector('#screen');
+const notice = document.querySelector('#notice');
+try {
+  const saved = JSON.parse(localStorage.getItem(key) || 'null');
+  if (saved && Number.isInteger(saved.step) && saved.step >= 0 && saved.step <= 6 && saved.answers && saved.choices) state = saved;
+} catch {}
+
+function save() {
+  try {localStorage.setItem(key, JSON.stringify(state));}
+  catch {notice.textContent = 'Черновик в этом браузере недоступен. В финале скачай ответы.';}
+}
+function element(tag, text, className) {
+  const node = document.createElement(tag);
+  if (text) node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+function button(text, action, primary = false) {
+  const node = element('button', text, primary ? 'primary' : '');
+  node.type = 'button';
+  node.addEventListener('click', action);
+  return node;
+}
+function go(step) {
+  state.step = step;
+  save();
+  render();
+  window.scrollTo(0, 0);
+  screen.querySelector('h1,h2').focus();
+}
+function heading(stage, title, tag = 'h2') {
+  const node = element(tag, title);
+  node.tabIndex = -1;
+  stage.append(node);
+}
+function createField([id, label, hint]) {
+  const field = element('div', '', 'field');
+  const title = element('label', label);
+  const description = element('small', hint);
+  description.id = id + '-hint';
+  title.htmlFor = id;
+  const input = element('textarea');
+  input.id = id;
+  input.setAttribute('aria-describedby', description.id);
+  input.value = state.answers[id] || '';
+  input.addEventListener('input', () => {state.answers[id] = input.value; save();});
+  field.append(title, description, input);
+  return field;
+}
+function createChoices([question, choices], roundNumber) {
+  const set = element('fieldset');
+  const row = element('div', '', 'choices');
+  set.append(element('legend', question), row);
+  for (const [key, title] of Object.entries(choices)) {
+    const label = element('label', '', 'choice');
+    const radio = element('input');
+    radio.type = 'radio';
+    radio.name = 'choice-' + roundNumber;
+    radio.checked = state.choices[roundNumber] === key;
+    radio.addEventListener('change', () => {state.choices[roundNumber] = key; save();});
+    label.append(radio, element('span', title));
+    row.append(label);
+  }
+  return set;
+}
+function resultRoles() {
+  const votes = Object.values(state.choices).filter(key => Object.hasOwn(roles, key));
+  if (votes.length < 2) return [];
+  const scores = Object.keys(roles).map(key => [key, votes.filter(vote => vote === key).length]);
+  const top = Math.max(...scores.map(([, score]) => score));
+  return scores.filter(([, score]) => score === top).map(([key]) => roles[key]);
+}
+function report() {
+  const paths = resultRoles();
+  const blocks = rounds.map((round, index) => {
+    const fields = round.fields.map(([id, label]) => '### ' + label + '\n\n' + (state.answers[id]?.trim() || '—'));
+    const chosen = round.pick?.[1]?.[state.choices[index + 1]];
+    if (chosen) fields.unshift(round.pick[0] + '\n\n' + chosen);
+    return '## ' + round.name + '\n\n' + fields.join('\n\n');
+  });
+  const hypothesis = paths.length ? paths.map(path => '- ' + path.name + '. Тест: ' + path.test + ' Идея продукта: ' + path.product).join('\n') : 'Для вывода о формате нужно хотя бы два игровых выбора.';
+  return '# Бриф автора\n\n' + blocks.join('\n\n') + '\n\n## Гипотезы по ответам\n\n' + hypothesis + '\n';
+}
+function download() {
+  const url = URL.createObjectURL(new Blob([report()], {type:'text/markdown;charset=utf-8'}));
+  const link = element('a');
+  link.href = url;
+  link.download = 'brief-avtora.md';
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  notice.textContent = 'Файл подготовлен. Его можно приложить к чату со стратегом.';
+}
+function render() {
+  const step = state.step;
+  document.querySelector('#meter').textContent = step === 0 ? '5 сцен' : step === 6 ? 'Бриф готов' : 'Сцена ' + step + ' из 5';
+  document.querySelector('#progress').value = Math.min(step, 5);
+  const stage = element('section', '', step === 0 ? 'stage cover' : 'stage');
+  const actions = element('div', '', 'actions');
+  screen.replaceChildren(stage);
+  if (step === 0) {
+    stage.append(element('p', 'Игровой бриф для авторов', 'eyebrow'));
+    heading(stage, 'Что попадёт в твой следующий сезон?', 'h1');
+    stage.append(element('p', 'За пять сцен ты соберёшь бриф из своих историй, сигналов от аудитории и одной идеи, которую можно предложить за деньги.', 'lead'));
+    const badges = element('div', '', 'badges');
+    for (const text of ['Твой голос', 'Улики от зрителей', 'Платный тест']) badges.append(element('span', text, 'badge'));
+    stage.append(badges);
+    actions.append(button('Начать', () => go(1), true));
+  } else if (step <= 5) {
+    const round = rounds[step - 1];
+    stage.append(element('p', 'Сцена ' + step + ' / 5', 'eyebrow'));
+    heading(stage, round.name);
+    stage.append(element('p', round.subtitle, 'lead'));
+    if (round.pick) stage.append(createChoices(round.pick, step));
+    const fields = element('div', '', 'fields');
+    round.fields.forEach(field => fields.append(createField(field)));
+    stage.append(fields);
+    actions.append(button('Назад', () => go(step - 1)), button(step === 5 ? 'Получить бриф' : 'Следующая сцена', () => go(step + 1), true));
+  } else {
+    heading(stage, 'Твой бриф собран');
+    const paths = resultRoles();
+    stage.append(element('p', paths.length > 1 ? 'Ответы ведут к нескольким форматам. Сравни их на коротком тесте.' : 'В брифе собраны твои ответы, примеры и идея первого теста.', 'lead'));
+    if (!paths.length) stage.append(element('p', 'Чтобы увидеть гипотезу о формате, ответь хотя бы на два игровых вопроса в сценах 2–4.', 'muted'));
+    for (const path of paths) {
+      const card = element('div', '', 'result');
+      card.append(element('h3', path.name), element('p', path.test), element('p', 'Первый продукт для проверки: ' + path.product));
+      stage.append(card);
+    }
+    stage.append(element('p', 'Сверь гипотезу со своими примерами и реакциями аудитории. Стратегию можно собрать после разбора ответов и статистики.', 'muted'));
+    actions.append(button('Скачать ответы', download, true), button('Вернуться к вопросам', () => go(5)));
+  }
+  stage.append(actions);
+}
+render();
+</script>
+</body>
+</html>
